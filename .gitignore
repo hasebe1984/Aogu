@@ -1,1 +1,21 @@
-/bin/
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.idea/
+*.iml
+vscode/
