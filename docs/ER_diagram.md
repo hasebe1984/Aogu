@@ -1,41 +1,38 @@
 # データベース設計 (ER図)
 
-
-
-アプリケーション名: **Aogu (アオグ)**
-
-
+## プロジェクト: Aogu (アオグ)
+**最終更新日:** 2025/12/20
+**概要:** サウナ・アウフグースイベントのスケジュール共有およびログ管理アプリケーション
 
 ```mermaid
-
 erDiagram
     %% ==========================================
-    %% 認証・ユーザー基盤 (Authentication)
+    %% ユーザー基盤 (User Management)
     %% ==========================================
     users {
         int id PK "ID"
-        string email UK "メールアドレス (ログインID)"
-        string password_hash "ハッシュ化パスワード (Google時はNULL可)"
+        string email UK "メールアドレス(ログインID)"
+        string password_hash "パスワード(ハッシュ)"
         string name "ニックネーム"
-        enum role "権限 (GENERAL / AUFGUSSER / ADMIN)"
-        datetime created_at "登録日時"
-        datetime updated_at "更新日時"
+        enum role "GENERAL / AUFGUSSER / ADMIN"
+        datetime created_at
+        datetime updated_at
     }
 
     %% ==========================================
-    %% アウフギーサー詳細 (Profile)
+    %% アウフギーサー (Profile)
     %% ==========================================
     aufgussers {
         int id PK "ID"
-        int user_id FK "ログインアカウントID (UK)"
-        string name "活動名 (芸名)"
-        string home_sauna "所属/ホームサウナ"
+        int user_id FK,UK "ユーザーID (1対1)"
+        string name "活動名"
+        string home_sauna "所属/ホーム"
         string image_url "アー写URL"
         text introduction "自己紹介"
     }
 
     %% ==========================================
-    %% 施設・マスタ (Facility)
+    %% 施設 (Facility)
     %% ==========================================
     facilities {
         int id PK "ID"
@@ -46,74 +43,77 @@ erDiagram
     }
 
     %% ==========================================
-    %% イベント・スケジュール (Core Logic)
+    %% スケジュール (Event Core)
     %% ==========================================
     schedules {
         int id PK "ID"
         int aufgusser_id FK "誰が"
         int facility_id FK "どこで"
-        datetime event_datetime "いつ"
-        enum gender_limit "男女制限 (MALE/FEMALE/MIXED)"
-        enum reservation_type "予約 (NONE/BOOKING/LOTTERY)"
+        datetime event_datetime "開催日時"
+        enum gender_limit "MALE / FEMALE / MIXED"
+        enum reservation_type "NONE / BOOKING / LOTTERY"
         int price "追加料金"
-        string reservation_url "予約ページURL"
-        datetime created_at "登録日時"
+        string reservation_url "予約URL"
+        datetime created_at
+        datetime updated_at
     }
 
     %% ==========================================
-    %% タグ・スタイル (Tags)
+    %% タグマスタ (Styles)
     %% ==========================================
     styles {
         int id PK "ID"
-        string name "タグ名 (激熱/リラックス等)"
-        string color "タグ色 (#FF0000等)"
+        string name UK "タグ名(激熱/リラックス等)"
+        string color "タグ色"
     }
 
+    %% 中間テーブル
     schedule_styles {
-        int schedule_id FK
-        int style_id FK
+        int schedule_id PK,FK
+        int style_id PK,FK
     }
 
     %% ==========================================
-    %% ログ・リアクション (User Action)
+    %% ログ・リアクション (User Actions)
     %% ==========================================
     logs {
         int id PK "ID"
-        int user_id FK "書いた人 (一般/演者問わず)"
-        int schedule_id FK "参加したイベント"
-        int reaction_id FK "スタンプID"
-        text comment "感想コメント"
-        datetime logged_at "記録日時"
+        int user_id FK "投稿者"
+        int schedule_id FK "イベント"
+        int reaction_id FK "リアクション"
+        text comment "感想"
+        datetime created_at
+        datetime updated_at
     }
 
     reactions {
         int id PK "ID"
-        string label "表示名 (ととのった！等)"
-        string icon_url "アイコン画像URL"
+        string label UK "表示名(ととのった等)"
+        string icon_url "アイコンURL"
     }
 
     %% ==========================================
     %% リレーション定義 (Relationships)
     %% ==========================================
-    
-    %% 1人のユーザーは、0または1つのアウフギーサー情報を持つ
-    users ||--o| aufgussers : "所有 (Role=AUFGUSSERのみ)"
 
-    %% アウフギーサーがスケジュールを作る
+    %% ユーザーとアウフギーサーは 1対0または1 (アウフギーサーは必ずユーザーだが、ユーザーはアウフギーサーとは限らない)
+    users ||--o| aufgussers : "所有"
+
+    %% アウフギーサーがスケジュールを作成 (1対多)
     aufgussers ||--o{ schedules : "出演"
 
-    %% 施設でスケジュールが行われる
+    %% 施設でスケジュールが開催される (1対多)
     facilities ||--o{ schedules : "開催"
 
-    %% スケジュールにタグが付く (多対多)
+    %% スケジュールとスタイルは多対多 (中間テーブル経由)
     schedules ||--o{ schedule_styles : "設定"
     styles ||--o{ schedule_styles : "付与"
 
-    %% ユーザーがログを書く
-    users ||--o{ logs : "記録"
-    
-    %% スケジュールに対してログが付く
-    schedules ||--o{ logs : "被評価"
-    
-    %% ログにはリアクションが付く
+    %% ユーザーがログを書く (1対多)
+    users ||--o{ logs : "投稿"
+
+    %% スケジュールに対してログが書かれる (1対多)
+    schedules ||--o{ logs : "記録"
+
+    %% ログにはリアクションが付く (1対多)
     reactions ||--o{ logs : "選択"
