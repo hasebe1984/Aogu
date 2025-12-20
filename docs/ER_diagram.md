@@ -17,8 +17,6 @@ erDiagram
         string email UK "メールアドレス (ログインID)"
         string password_hash "ハッシュ化パスワード (Google時はNULL可)"
         string name "ニックネーム"
-        string provider "認証元 (local/google)"
-        string provider_id "Google等のユーザーID"
         enum role "権限 (GENERAL / AUFGUSSER / ADMIN)"
         datetime created_at "登録日時"
         datetime updated_at "更新日時"
