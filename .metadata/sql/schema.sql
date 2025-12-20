@@ -58,7 +58,7 @@ CREATE TABLE aufgussers (
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
--- 施設
+-- サウナ施設
 CREATE TABLE facilities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
